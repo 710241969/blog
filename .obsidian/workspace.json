@@ -1,0 +1,191 @@
+{
+  "main": {
+    "id": "c9528599237db844",
+    "type": "split",
+    "children": [
+      {
+        "id": "bc3d6ad942d0e98c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "aa5c51cd6ab9e203",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "面试题/mysql.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "33832953fab37cbe",
+    "type": "split",
+    "children": [
+      {
+        "id": "998f75c22efed007",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "58213cf56217e7cf",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "23da99eece79d546",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "c81d40ebd3fbaa6f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "22722efda23aade0",
+    "type": "split",
+    "children": [
+      {
+        "id": "d4a9f76acef9e8ef",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0d3bc9aaab1f81de",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "面试题/mysql.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "fc426f4fbfcb00f4",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "面试题/mysql.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "16897cdc5c4222d0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "197957882c66fdb6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "面试题/mysql.md"
+              }
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "aa5c51cd6ab9e203",
+  "lastOpenFiles": [
+    "面试题/Mybatis.md",
+    "数据库/MySQL/索引失效.md",
+    "面试题/java.md",
+    "面试题/计算机网络.md",
+    "Java Spring/AOP 代理.md",
+    "面试题/spring.md",
+    "面试题/mysql.md",
+    "面试题/redis.md",
+    "数据库/MySQL/存储引擎比较.md",
+    "数据库/MySQL/存储引擎比较",
+    "面试题/jvm.md",
+    "算法/LRU.md",
+    "数据库/MySQL/慢查询优化.md",
+    "数据库/事务隔离级别.md",
+    "数据库/事务特性.md",
+    "数据库/MySQL/MVCC.md",
+    "数据库/未命名.md",
+    "数据库/MySQL",
+    "Java/集合/HashMap.md",
+    "数据库",
+    "Java/JUC/并发集合/ConcurrentHashMap.md",
+    "Java/JUC/并发集合/源码学习.md",
+    "Pasted image 20230513195943.png",
+    "Pasted image 20230513194931.png",
+    "Java/线程/InheritableThreadLocal.md",
+    "Java/线程/ThreadLocal.md",
+    "Java/线程",
+    "Java/集合",
+    "1.md",
+    "设计模式/结构型模式/代理/cglib代理.md",
+    "面试题",
+    "JVM/常见参数.md",
+    "找工作.md",
+    "算法/最短路径/SPFA 算法.md",
+    "算法/最短路径",
+    "算法/排序算法",
+    "算法",
+    "计算机网络/TCP",
+    "Pasted image 20230509154820.png"
+  ]
+}
