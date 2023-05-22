@@ -82,10 +82,12 @@ public class HashMap<K,V> extends AbstractMap<K,V>
 }
 ```
 
+___
 # 扩容机制
 默认构造函数得到的`HashMap`的`tabld`是`null`的，作为延迟加载，会在第一次`put`操作的时候才初始化，初始化默认长度为 16 的数组
 当数组使用达到长度×扩容因子，会再次进行扩容，扩容长度为一倍
 当 hash 冲突导致链表长度等于 8 的时候，会进行一次树化判断，如果数组长度小于 64 ，会进行扩容，而不是树化，当数组长度大于等于 64 ，会将当前的链表转换为红黑树
+HashMap 不支持锁绒
 ```java
 public class HashMap<K,V> extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable {
@@ -155,8 +157,9 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     ...
 
 ```
-
+___
 # 红黑树退化
+
 ## 红黑树退化一
 进行扩容`resize()`时，红黑树拆分成的树的结点数小于等于临界值6个，则退化成链表
 `HashMap`类常量定义了树退化的个数临界值
@@ -262,5 +265,61 @@ final void removeTreeNode(HashMap<K,V> map, Node<K,V>[] tab,
     ...
 }
 ```
+
+___
+# 红黑树排序
+```java
+final void treeify(Node<K,V>[] tab) {  
+	...
+	else if ((kc == null &&  
+	(kc = comparableClassFor(k)) == null) ||  
+	(dir = compareComparables(kc, k, pk)) == 0) 
+		dir = tieBreakOrder(k, pk);
+	...
+}
+```
+如果是实现了  Comparable 则调用 compareTo 方法排序
+如果没有实现，则
+```java
+static int tieBreakOrder(Object a, Object b) {  
+	int d;  
+	if (a == null || b == null ||  
+	(d = a.getClass().getName().  
+	compareTo(b.getClass().getName())) == 0)  
+		d = (System.identityHashCode(a) <= System.identityHashCode(b) ?  
+	-1 : 1);  
+	return d;  
+}
+```
+默认的排序是按照 String 的排序（通过比较类名来排序），如果类名也相同（一般也是相同的） ，那么会按照对象的hashcode来进行比较排序，至此，肯定可以实现两个对象的排序了
+
+
+___
+# 线程安全问题
+
+## jdk1.7
+1.7 用的头插法，并发扩容可能导致链表循环指针和 Entry 丢失
+并发写入可能导致 Entry 覆盖
+
+## jdk1.8
+1.8 用的尾插法，解决了循环指针和 Entry 丢失问题
+但是，并发写入可能导致 Entry 覆盖
+
+
+
+
+___
+# NULL 值
+HashMap KV 都允许 null 值。HashMap中key允许为null，当其为null时，定义hash取0的位置，否则计算相应的hash值，代码如下。
+```java
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+因为 HashMap 的设计是给单线程使用的，所以如果查询到了 null 值，我们可以通过 hashMap.containsKey(key) 的方法来区分这个 null 值到底是存入的 null？还是压根不存在的 null？这样二义性问题就得到了解决，所以 HashMap 不怕二义性问题。
+
+
+
 
 

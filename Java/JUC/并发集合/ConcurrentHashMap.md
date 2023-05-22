@@ -145,3 +145,37 @@ but in a concurrent one, the map might have changed between calls.
 # 插入过程
 CAS 进行数组中桶的第一个元素的插入
 synchronized 对出现 hash 碰撞时，数组当前的桶的链表头进行加锁，也就对当前的桶进行独占了
+
+# NULL 值
+ConcurrentHashMap KV 都不允许 null 值。代码如下。
+```java
+final V putVal(K key, V value, boolean onlyIfAbsent) {  
+	if (key == null || value == null) throw new NullPointerException();
+	...
+}
+```
+## 二义性问题
+所谓的二义性问题是指含义不清或不明确。我们假设 ConcurrentHashMap 允许插入 null，那么此时就会有二义性问题，它的二义性含义有两个：
+1.  值没有在集合中，所以返回 null。
+2.  值就是 null，所以返回的就是它原本的 null 值。
+可以看出这就是 ConcurrentHashMap 的二义性问题
+
+HashMap 就不怕二义性问题[[HashMap#NULL 值]]
+
+而 ConcurrentHashMap 就不一样了，因为 ConcurrentHashMap 使用的场景是多线程，所以它的情况更加复杂。我们假设 ConcurrentHashMap 可以存入 null 值，有这样一个场景，现在有一个线程 A 调用了 concurrentHashMap.containsKey(key)，我们期望返回的结果是 false，但在我们调用 concurrentHashMap.containsKey(key) 之后，未返回结果之前，线程 B 又调用了 concurrentHashMap.put(key,null) 存入了 null 值，那么线程 A 最终返回的结果就是 true 了，这个结果和我们之前预想的 false 完全不一样。也就是说，多线程的状况非常复杂，我们没办法判断某一个时刻返回的 null 值，到底是值为 null，还是压根就不存在，也就是二义性问题不可被证伪，所以 ConcurrentHashMap 才会在源码中这样设计，直接杜绝 key 或 value 为 null 的歧义问题。
+
+### ConcurrentHashMap 设计者的回答
+
+对于 ConcurrentHashMap 不允许插入 null 值的问题，有人问过 ConcurrentHashMap 的作者 Doug Lea，以下是他回复的邮件内容：
+
+> The main reason that nulls aren't allowed in ConcurrentMaps (ConcurrentHashMaps, ConcurrentSkipListMaps) is that ambiguities that may be just barely tolerable in non-concurrent maps can't be accommodated. The main one is that if map.get(key) returns null, you can't detect whether the key explicitly maps to null vs the key isn't mapped. In a non-concurrent map, you can check this via map.contains(key),but in a concurrent one, the map might have changed between calls. Further digressing: I personally think that allowing nulls in Maps (also Sets) is an open invitation for programs to contain errors that remain undetected until they break at just the wrong time. (Whether to allow nulls even in non-concurrent Maps/Sets is one of the few design issues surrounding Collections that Josh Bloch and I have long disagreed about.)
+> 
+> > It is very difficult to check for null keys and values in my entire application .
+> 
+> Would it be easier to declare somewhere     static final Object NULL = new Object(); and replace all use of nulls in uses of maps with NULL? -Doug
+
+以上信件的主要意思是，Doug Lea 认为这样设计最主要的原因是：不容忍在并发场景下出现歧义！
+
+___
+# 参考感谢
+https://blog.csdn.net/sufu1065/article/details/122738710
