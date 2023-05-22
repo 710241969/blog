@@ -1,4 +1,7 @@
+___
+# 概述
 
+___
 # 对象定义
 ```Java
 public class ThreadLocal<T> {
@@ -52,7 +55,7 @@ ThreadLocalMap 定了了叫 table 的 Entry 列表成员变量，作为实际数
 
 # 数据结构
 数据结构是一维数组
-ThreadLocalMap 是 ThreadLocal 的内部类，没有实现 Map 接口，用独立的方式实现了 Map 的功能，其内部的 Entry 也独立实现，非常简单，初始为 16 长度的数组
+ThreadLocalMap 是 ThreadLocal 的内部类，没有实现 Map 接口，用独立的方式实现了 Map 的功能，其内部的 Entry 也独立实现，非常简单，初始为 16 长度的数组，扩容直接扩大一倍
 和 HashMap 的最大的不同在于，ThreadLocalMap 结构非常简单，没有 next 引用，也就是说 ThreadLocalMap 中解决 Hash 冲突的方式并非链表的方式，而是采用线性探测的方式，所谓线性探测，就是根据初始 key 的 hashcode 值确定元素在 table 数组中的位置，如果发现这个位置上已经有其他 key 值的元素被占用，则利用固定的算法寻找一定步长的下个位置，依次判断，直至找到能够存放的位置。
 ThreadLocalMap 解决 Hash 冲突的方式就是简单的步长加 1 或减 1，寻找下一个相邻的位置
 
@@ -90,6 +93,16 @@ Thread 类中定义了默认权限的成员变量  `threadLocals`
     }
 ```
 所以其实 ThreadLocal.get 方法，就是获取当前线程对象，再通过线程对象来读取 ThreadLocalMap ，访问其中的 ThreadLocal Key
+
+# 为什么使用弱引用
+如上面所说，`ThreadLocalMap`是真正用来存放对象的，`ThreadLocalMap`本身并没有为外界提供取出和存放数据的 API，我们所能获得数据的方式只有通过`ThreadLocal`类提供的 API 来间接的从`ThreadLocalMap`取出数据，所以，当我们用不了 key（ThreadLocal对象）的 API 也就无法从`ThreadLocalMap`里取出指定的数据
+假设`ThreadLocal`是函数内 new 的，函数退出，对象被回收了，这些 get 和 set 方法也访问不到了，也就没法从`ThreadLocalMap`里取出数据了。没法利用 API 取出数据，那这个 Entry 对象还有用吗？所以最好的方法是在`ThreadLocal`对象被回收后，系统自动回收对应的`Entry`对象
+所以，让key（threadLocal对象）为弱引用，自动被垃圾回收，`key`就变为`null`了，后面就可以通过`Entry`不为`null`，而`key`为`null`来判断该`Entry`对象该被清理掉了
+
+# 那为什么不把 Enrty 或 Value 设计成弱引用
+假设 ThreadLocal 对象是 static 的，那么强引用一直存在
+如果 Enrty 没有被强引用，如果是弱引用，一次 GC 后就变成 null，就导致我们查询不到值
+同理 Value 如果是在一个函数内 new 出来的，函数退出，强引用就没了，一次 GC 后 Value 也为 null，导致我们查不到值
 
 # 内存泄漏
 由于 ThreadLocalMap 的 key 是弱引用，而Value是强引用。这就导致了一个问题，ThreadLocal 在没有外部对象强引用时，发生 GC 时弱引用 Key 会被回收，而 Value 不会回收，如果创建 ThreadLocal 的线程一直持续运行，那么这个 Entry 对象中的 value 就有可能一直得不到回收，发生内存泄露。
