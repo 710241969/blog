@@ -94,7 +94,33 @@ ___
     }
 ```
 
-
+```java
+/**  
+* Head of the wait queue, lazily initialized. Except for  
+* initialization, it is modified only via method setHead. Note:  
+* If head exists, its waitStatus is guaranteed not to be  
+* CANCELLED.  
+*/  
+private transient volatile Node head;  
+  
+/**  
+* Tail of the wait queue, lazily initialized. Modified only via  
+* method enq to add new wait node.  
+*/  
+private transient volatile Node tail;  
+  
+/**  
+* The synchronization state.  
+*/  
+private volatile int state;
+```
 
 公平锁和非公平锁就是基于这个队列而言的：
-公平锁，是按照通过 CLH 等待线程按照队列 FIFO 的规则，公平的获取锁；而非公平锁，则当线程要获取锁时，它会无视CLH等待队列而直接获取锁
+公平锁，是按照通过 CLH 等待线程按照队列 FIFO 的规则，公平的获取锁；而非公平锁，则当线程要获取锁时，它会无视CLH等待队列而直接获取锁。
+
+通过 CAS 修改 state 的值来实现线程安全
+
+通过 LockSupport.park(this); 来阻塞
+
+通过 LockSupport.unpark(s.thread); 来唤醒 CLH 的第一个等待线程
+
