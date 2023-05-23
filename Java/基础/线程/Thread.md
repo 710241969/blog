@@ -15,7 +15,7 @@ ___
 请求获取 monitor lock 从而进入 synchronized 函数或者代码块，但是其它线程已经占用了该 monitor lock，所以出于阻塞状态。要结束该状态进入从而 RUNABLE 需要其他线程释放 monitor lock。
 
 ### 等待
-####无限期等待（WAITING）
+#### 无限期等待（WAITING）
 等待其它线程显式地唤醒。
 
 阻塞和等待的区别在于，阻塞是被动的，它是在等待获取 monitor lock。而等待是主动的，通过调用 Object.wait() 等方法进入

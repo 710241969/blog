@@ -1,5 +1,9 @@
-
-
+___
+# 原理
+## 工作流程
+1. 先判断线程池运行的线程是否达到`corePoolSize`，如果没有则新创建一个线程执行刚提交的任务，否则，则进入第 2 步；
+2. 将当前任务加入阻塞队列，；否则，则进入第 3 步；
+3. 判断线程池的线程数量是否达到`maximumPoolSize`，如果没有，则创建一个新的线程来执行任务，否则，则交给拒绝策略进行处理
 
 ___
 # 源码分析
@@ -117,7 +121,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
 ### TimeUnit unit 的时间单位
 
-### BlockingQueue<Runnable> workQueue 任务队列
+### `BlockingQueue<Runnable> workQueue` 任务队列
 当核心线程数达到最大时，新任务会放在队列中排队等待执行
 直到队列满了才会开启新线程，直到数量达到 maximumPoolSize
 
@@ -241,19 +245,6 @@ ThreadPoolExecutor 中内置四个实现，我们也可以自定义实现 Reject
     }
 ```
 
-## execute
-
-## submit
-
-## execute 和 submit 比较
-execute的入参是Runnable， 没有返回值。任务通过execute提交后就基本和主线程脱离关系了。
-
-而submit的入参可以是Callable(也可以是Runnable)，并且有返回值，返回的是一个Future对象，然后通过对象的get方法获取任务执行的结果。
-线程池通过submit方式提交任务，会把Runnable封装成FutrueTask，每次提交都会创建一个新的实例
-
-如果runable中的方法抛出异常，`execute`会终止这个线程。而`submit`不会，异常被set了，可以用get主动拉取到的
-如果使用submit，要么用get拉取异常处理， 要么自己写try catch把任务执行的逻辑包起来
-
 ## 线程池状态
 ```java
     /**
@@ -286,4 +277,75 @@ execute的入参是Runnable， 没有返回值。任务通过execute提交后就
     private static final int TERMINATED =  3 << COUNT_BITS;
 ```
 
+## execute
+```java
+    public void execute(Runnable command) {
+        if (command == null)
+            throw new NullPointerException();
+        int c = ctl.get();
+        // 1. 先判断线程池运行的线程是否达到 corePoolSize
+        if (workerCountOf(c) < corePoolSize) {
+            // 1.1 没有则新建一个线程执行当前任务
+            if (addWorker(command, true))
+                return;
+            c = ctl.get();
+        }
+        // 2. 已经达到 corePoolSize 则尝试放入阻塞队列 workQueue
+        if (isRunning(c) && workQueue.offer(command)) {
+            int recheck = ctl.get();
+            if (! isRunning(recheck) && remove(command))
+                // 判断线程池状态，如果不是 RUNNING 则把任务删掉，并执行拒绝策略
+                reject(command);
+            else if (workerCountOf(recheck) == 0)
+                // 如果线程池正常运行，并且 worker 线程数量是 0 ，则添加一个没有任务的 worker
+                addWorker(null, false);
+        }
+        // 插入队列失败，尝试扩充线程数量到 maximumPoolSize
+        else if (!addWorker(command, false))
+            // 扩充失败，执行拒绝侧脸
+            reject(command);
+    }
+```
 
+## submit
+
+### execute 和 submit 比较
+execute 的入参是 Runnable， 没有返回值。任务通过execute提交后就基本和主线程脱离关系了。
+
+而submit的入参可以是Callable(也可以是Runnable)，并且有返回值，返回的是一个Future对象，然后通过对象的get方法获取任务执行的结果。
+线程池通过submit方式提交任务，会把Runnable封装成FutrueTask，每次提交都会创建一个新的实例
+
+如果runable中的方法抛出异常，`execute`会终止这个线程。而`submit`不会，异常被set了，可以用get主动拉取到的
+
+使用submit，要么用get拉取异常处理， 要么自己写try catch把任务执行的逻辑包起来
+
+## shutdownNow
+```java
+    public List<Runnable> shutdownNow() {
+        List<Runnable> tasks;
+        final ReentrantLock mainLock = this.mainLock;
+        mainLock.lock();
+        try {
+            checkShutdownAccess();
+            advanceRunState(STOP);
+            // 仅仅是中断当前执行线程，不保证是马上停止
+            interruptWorkers();
+            // 清空阻塞队列内的任务
+            tasks = drainQueue();
+        } finally {
+            mainLock.unlock();
+        }
+        tryTerminate();
+        return tasks;
+    }
+```
+
+# 线程池回收
+java.util.concurrent.ThreadPoolExecutor#runWorker 中如果 java.util.concurrent.ThreadPoolExecutor#getTask 取出为空
+则进行 processWorkerExit 进行线程回收
+
+
+
+
+# 参考感谢
+https://blog.csdn.net/qq_41573860/article/details/123291943

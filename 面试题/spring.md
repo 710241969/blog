@@ -23,7 +23,7 @@
 [[MVC#Spring MVC 工作流程]]
 
 # Spring 框架中用到了哪些设计模式？
-[[设计模式]]
+[[Java/Java Spring/设计模式]]
 
 # beanFactory和ApplicationContext的区别
 [[IOC 容器#BeanFactory 接口和 ApplicationContext 接口有什么区别]]
