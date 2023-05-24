@@ -277,7 +277,39 @@ ThreadPoolExecutor 中内置四个实现，我们也可以自定义实现 Reject
     private static final int TERMINATED =  3 << COUNT_BITS;
 ```
 
+## Worker
+Worker 类本身既实现了Runnable，又继承了AbstractQueuedSynchronizer，所以其既是一个可执行的任务，又可以达到锁的效果
+```java
+    private final class Worker
+        extends AbstractQueuedSynchronizer
+        implements Runnable
+    {
+        // 内部维护了线程实例，靠此实例调用 start() 开启线程
+        final Thread thread;
+        
+        // 用户传入的实际工作任务， run 方法会在 runWorker 内被调用
+        Runnable firstTask;
+
+        /**
+         * Creates with given first task and thread from ThreadFactory.
+         * @param firstTask the first task (null if none)
+         */
+        Worker(Runnable firstTask) {
+            setState(-1); // inhibit interrupts until runWorker
+            this.firstTask = firstTask;
+            this.thread = getThreadFactory().newThread(this);
+        }
+
+        // 线程启动后实际上会调用 worker 的这个 run 方法，在 runWorker 中调用 firstTask 或从队列获取 task 来调用 run 方法
+        public void run() {
+            runWorker(this);
+        }
+
+    }
+```
+
 ## execute
+![[Pasted image 20230523200615.png]]
 ```java
     public void execute(Runnable command) {
         if (command == null)
@@ -340,12 +372,16 @@ execute 的入参是 Runnable， 没有返回值。任务通过execute提交后�
     }
 ```
 
-# 线程池回收
+## 线程池回收
 java.util.concurrent.ThreadPoolExecutor#runWorker 中如果 java.util.concurrent.ThreadPoolExecutor#getTask 取出为空
 则进行 processWorkerExit 进行线程回收
 
 
 
 
+
 # 参考感谢
 https://blog.csdn.net/qq_41573860/article/details/123291943
+https://blog.csdn.net/wangfenglei123456/article/details/122563597
+https://blog.csdn.net/zs18753479279/article/details/123776184
+

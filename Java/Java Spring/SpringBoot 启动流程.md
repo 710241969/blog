@@ -69,10 +69,6 @@ public enum WebApplicationType {
 	}
 ```
 
-
-
-
-
 ___
 # ApplicationContext 实现类确定
 org.springframework.boot.SpringApplication#run(java.lang.String...)
@@ -187,6 +183,43 @@ public ConfigurableApplicationContext run(String... args) {
 IOC 容器初始化流程，最终其实调用的是 org.springframework.context.support.AbstractApplicationContext#refresh
 [[IOC 容器#源码分析#refresh]]
 
+## Tomcat 启动
+Spring Boot是在容器的onRefresh方法中调用Tomcat的。
+org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext#onRefresh
+```java
+	@Override
+	protected void onRefresh() {
+		super.onRefresh();
+		try {
+			createWebServer();
+		}
+		catch (Throwable ex) {
+			throw new ApplicationContextException("Unable to start web server", ex);
+		}
+	}
+```
+org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext#createWebServer
+```java
+    private void createWebServer() {
+        WebServer webServer = this.webServer;
+        ServletContext servletContext = this.getServletContext();
+        //webServer和servletContext都是null，表示还没创建容器，进入创建容器的逻辑
+        if (webServer == null && servletContext == null) {
+            //获取创建容器的工厂，可以通过WebServerFactoryCustomizer接口对这个工厂进行自定义设置
+            ServletWebServerFactory factory = this.getWebServerFactory();
+            //具体的创建容器的方法，我们进去具体看下
+            this.webServer = factory.getWebServer(new ServletContextInitializer[]{this.getSelfInitializer()});
+        } else if (servletContext != null) {
+            try {
+                this.getSelfInitializer().onStartup(servletContext);
+            } catch (ServletException var4) {
+                throw new ApplicationContextException("Cannot initialize servlet context", var4);
+            }
+        }
+        this.initPropertySources();
+    }
+```
+Servlet容器初始化：在Tomcat启动过程中，Servlet容器会被初始化。它会读取应用程序的类路径下的Servlet、Filter和Listener等相关组件，并进行初始化和注册。
 
-
+请求处理：一旦Tomcat成功启动，它会监听指定的端口号，并等待来自客户端的HTTP请求。当收到请求时，Tomcat会根据配置的路由规则和请求的URL将请求转发给相应的Servlet进行处理。
 
