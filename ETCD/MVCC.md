@@ -6,6 +6,8 @@ MVCC模块包含treeIndex和boltdb，treeIndex在内存中
 treeIndex 由 B 树实现，维护版本号和用户key的映射关系
 boltdb 底层由 B+ 树实现，真正的数据存储在boltdb中，启动时会加载到内存
 
+在 treeIndex 通过 key 找版本，再到存储引擎找到 KV
+
 # 读写机制
 etcd 是串行写，并发读。  
 
@@ -26,6 +28,12 @@ etcd 是串行写，并发读。
 ## 读
 ![[Pasted image 20230522130253.png]]
 从 treeIndex 中获取 key hello 的版本号，再以版本号作为 boltdb 的 key，从 boltdb 中获取其 value 信息
+
+RANGE(查找)
+1.**开启一个读事务，并获取当前系统最新的版本 ID(main) currRev**。
+2.根据 key 和 currRev 从 treeIndex 中**查找 key 中所有版本号中第一个小于等于 currRev 的 revision**。 比如 main=3, 那么查找到的 revision 就是(2,3)。
+3.**根据 revision, 生成 bbolt key(2_3)值，并从 bbolt 中获取 keyValue 值**。
+
 
 ## TreeIndex：内存索引模块 treeIndex，保存 key 的历史版本号信息
 B 树实现，treeIndex 模块是基于 Google 开源的内存版 btree 库实现的

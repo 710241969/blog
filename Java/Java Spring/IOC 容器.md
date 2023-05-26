@@ -113,5 +113,57 @@ ___
 		}
 	}
 ```
+prepareRefresh
+obtainFreshBeanFactory
+prepareBeanFactory
+postProcessBeanFactory
+invokeBeanFactoryPostProcessors
+registerBeanPostProcessors
+initMessageSource
+initApplicationEventMulticaster
+onRefresh
+registerListeners
+finishBeanFactoryInitialization
+finishRefresh
+步骤2-6是创建并准备beanFactory对象
+步骤7-12是完善applicationContext的其他功能
+步骤11是创建非懒加载的单例对象
+
+prepareRefresh准备上下文环境，系统环境变量
+
+obtainFreshBeanFactory创建BeanFactory，为beanFactory中的成员变量beanDefinitionMap（**是个容器**）进行初始化，该map的作用是保存BeanDefinition对象。BeanDefinition作为bean的设计蓝图，规定了bean的特征，如单例、依赖关系、初始销毁方法。后续 bean 的创建就是根据这个来的
+
+prepareBeanFactory进一步完善beanFactory。为它的其他各项成员变量赋值
+
+postProcessBeanFactory 是一个空实现，留给子类扩展。这里体现了模板方法设计模式
+
+invokeBeanFactoryPostProcessors 会调用**所有的**beanFactory后置处理器，作用是充当**beanFactory的扩展点**，可以**添加或修改BeanDefinition**
+
+registerBeanPostProcessors  beanDefinitionMap中找出所有的bean后置处理器，生成实例对象并保存到beanPostProcessors集合。就是找出实现了 BeanPostProcessors 接口的类
+
+initMessageSource 向ApplicationContext添加messageSource成员，实现国际化功能
+
+initApplicationContextEventMulticaster 向ApplicationContext的成员变量applicationEventMulticaster赋值（初始化）。事件广播器，它里面维护了一个集合，该集合保存了spring容器的所有监听器。如果需用用事件广播器发生事件，则事件广播器就会遍历它所维护的集合，然后给相应的监听器发送事件
+
+onRefresh 这一步也是一个空实现，留给子类扩展。模板方法模式。比如 spring boot Tomcat 就在这里面启动
+
+registerListeners 从多种途径中找到事件监听器对象，并添加到applicationEventMulticaster维护的集合当中
+
+finishBeanFactoryInitialization 这一步会将beanFactory的成员补充完毕。并且初始化**剩下的所有的非懒加载单例bean**
+
+finishRefresh 为ApplicationContext添加lifecycleProcessor成员。用来控制容器内需要生命周期管理的bean
+
+prepareRefresh：准备好环境变量，配置变量
+obtainFreshBeanFactory：创建或获取bean工厂
+prepareBeanFactory：准备bean工厂
+postProcessBeanFactory：子类去扩展bean工厂
+invokeBeanFactoryPostProcessors：自定义beanFactory后置处理器去扩展bean工厂
+registerBeanPostProcessors：准备bean后置处理器
+initMessageSource：为spring容器提供国际化功能
+initApplicationEventMulticaster：为spring容器提供事件发布器
+onRefresh：留给子类对spring容器进行扩展
+registerListeners：为spring容器注册监听器
+finishBeanFactoryInitialization：初始化剩余的非懒加载单例bean，执行bean后置处理器扩展
+finishRefresh：准备spring容器生命周期管理器，发布contextRefreshed事件
 
 

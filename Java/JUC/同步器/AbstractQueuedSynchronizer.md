@@ -115,6 +115,31 @@ private transient volatile Node tail;
 private volatile int state;
 ```
 
+## 模版方法模式
+```java
+    protected boolean tryAcquire(int arg) {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected boolean tryRelease(int arg) {
+        throw new UnsupportedOperationException();
+    }
+    
+    protected int tryAcquireShared(int arg) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected boolean tryReleaseShared(int arg) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected boolean isHeldExclusively() {
+        throw new UnsupportedOperationException();
+    }
+```
+通过模版方法模式，由子类实现对`state`的修改
+
+## 总结
 公平锁和非公平锁就是基于这个队列而言的：
 公平锁，是按照通过 CLH 等待线程按照队列 FIFO 的规则，公平的获取锁；而非公平锁，则当线程要获取锁时，它会无视CLH等待队列而直接获取锁。
 
@@ -123,4 +148,28 @@ private volatile int state;
 通过 LockSupport.park(this); 来阻塞
 
 通过 LockSupport.unpark(s.thread); 来唤醒 CLH 的第一个等待线程
+
+___
+# 实现的子类
+Sync in ReentrantLock
+FairSync in ReentrantLock
+NonfairSync in ReentrantLock
+
+Sync in ReentrantReadWriteLock
+FairSync in ReentrantReadWriteLock
+NonfairSync in ReentrantReadWriteLock
+
+FairSync in Semaphore
+NonfairSync in Semaphore
+
+Sync in CountDownLatch
+
+Sync in LimitLatch
+
+Sync in Semaphore
+
+Worker in ThreadPoolExecutor
+
+
+
 
