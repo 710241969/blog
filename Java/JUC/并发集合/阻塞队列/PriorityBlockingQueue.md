@@ -12,7 +12,7 @@ ___
 ## 原理
 元素必须实现`Compare`接口或在`PriorityBlockingQueue`构造函数中传入`Comparator`接口实现
 一把`ReentrantLock`独占锁`lock`来保证线程同步安全。
-一个信号量`Condition`是`notEmpty`来做当队列为空时的阻塞操作。当使用阻塞的获取方法`take`获取元素时，队列没有元素或者当前线程不是`leader`则会被阻塞。
+一个信号量`Condition`是`notEmpty`来做当队列为空时的阻塞操作。当使用阻塞的获取方法`take`获取元素时，队列没有元素则会被`notEmpty`条件原语阻塞。
 
 ___
 
