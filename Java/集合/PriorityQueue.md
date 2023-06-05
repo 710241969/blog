@@ -8,6 +8,7 @@ ___
 基于数组实现的最小二叉堆算法，堆就是一棵完全二叉树
 最大容量是`Integer.MAX_VALUE - 8`
 不允许 null 元素
+默认是最小堆
 
 # 原理
 优先根据 Comparator 没有就根据 Comparable 的实现，来构建堆
